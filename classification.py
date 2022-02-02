@@ -37,3 +37,57 @@ def load_data(path):
 
 train_data = load_data('./image_class/input/train')
 test_data = load_data('./image_class/input/test')
+
+x_train = []
+y_train = []
+x_val = []
+y_val = []
+
+for feature, label in train_data:
+    x_train.append(feature)
+    y_train.append(label)
+
+for feature, label in test_data:
+    x_val.append(feature)
+    y_val.append(label)
+
+x_train = np.array(x_train) / 255
+x_val = np.array(x_val) / 255
+
+x_train.reshape(-1, img_size, img_size, 1)
+y_train = np.array(y_train)
+
+x_val.reshape(-1, img_size, img_size, 1)
+y_val = np.array(y_val)
+
+datagen = ImageDataGenerator(
+        featurewise_center=False,  # set input mean to 0 over the dataset
+        samplewise_center=False,  # set each sample mean to 0
+        featurewise_std_normalization=False,  # divide inputs by std of the dataset
+        samplewise_std_normalization=False,  # divide each input by its std
+        zca_whitening=False,  # apply ZCA whitening
+        rotation_range = 30,  # randomly rotate images in the range (degrees, 0 to 180)
+        zoom_range = 0.2, # Randomly zoom image 
+        width_shift_range=0.1,  # randomly shift images horizontally (fraction of total width)
+        height_shift_range=0.1,  # randomly shift images vertically (fraction of total height)
+        horizontal_flip = True,  # randomly flip images
+        vertical_flip=False)  # randomly flip images
+
+datagen.fit(x_train)
+
+model = Sequential()
+model.add(Conv2D(32, 3, padding="same", activation="relu", input_shape=(224,224,3)))
+model.add(MaxPool2D())
+
+model.add(Conv2D(32, 3, padding="same", activation="relu"))
+model.add(MaxPool2D())
+
+model.add(Conv2D(64, 3, padding="same", activation="relu"))
+model.add(MaxPool2D())
+model.add(Dropout(0.4))
+
+model.add(Flatten())
+model.add(Dense(128, activation="relu"))
+model.add(Dense(2, activation="softmax"))
+
+model.summary()
